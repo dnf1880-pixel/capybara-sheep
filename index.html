@@ -5048,6 +5048,26 @@ button:focus-visible,
   margin-left: auto;
 }
 
+/* ⑭ 静音状态必须一眼看得出来：原来只把颜色调浅，误触后玩家以为游戏坏了 */
+.icon-btn.is-muted {
+  color: #d9705c;
+  background: rgba(217, 112, 92, 0.12);
+  box-shadow: inset 0 0 0 1.5px rgba(217, 112, 92, 0.32);
+}
+
+/* 玩法弹窗里的音频排障提示 */
+.help-audio {
+  margin: 8px 0 0;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(244, 236, 220, 0.62);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: left;
+}
+
 /* ⑫ 地图弹窗纵向撑开：场景吃掉剩余高度，底部按钮贴底，别让「继续冒险」下面空一大片 */
 @media (max-width: 920px) {  .map-modal {
     display: flex;
@@ -5642,6 +5662,7 @@ button:focus-visible,
         <span>💡</span>
         <p>卡槽快满时优先凑三张；每关的贴纸堆和背景都是实时生成的。</p>
       </div>
+      <p class="help-audio">手机没声音？先看一下侧边静音开关，再点右上角喇叭确认不是关着的。</p>
       <button class="primary-btn" id="helpOk" type="button">知道啦</button>
     </div>
   </div>
@@ -6447,35 +6468,94 @@ button:focus-visible,
   const audio = {
     ctx: null,
     enabled: true,
+    unlocked: false,
+    volume: 1.7,
+
+    // iOS Safari / 微信内置浏览器：AudioContext 必须在用户手势里创建并 resume，
+    // 而且得真正播过一次样本才解锁。第一次触摸屏幕就把它办掉，别等进关卡才现建。
+    unlock() {
+      if (!this.enabled) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!this.ctx) {
+        try { this.ctx = new AC(); } catch (e) { return; }
+      }
+      const ctx = this.ctx;
+      if (ctx.state === 'suspended') {
+        const p = ctx.resume();
+        if (p && p.catch) p.catch(() => {});
+      }
+      if (!this.unlocked) {
+        try {
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate || 22050);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start(0);
+          this.unlocked = true;
+        } catch (e) { /* 解锁失败也不影响后续重试 */ }
+      }
+      // iOS 17+：声明成 playback 会话，避免被侧边静音键吞掉
+      if (navigator.audioSession) {
+        try { navigator.audioSession.type = 'playback'; } catch (e) { /* ignore */ }
+      }
+    },
+
     ensure() {
       if (!this.enabled) return null;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
       if (!this.ctx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return null;
-        this.ctx = new AC();
+        try { this.ctx = new AC(); } catch (e) { return null; }
       }
-      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      if (this.ctx.state !== 'running') {
+        const p = this.ctx.resume();
+        if (p && p.catch) p.catch(() => {});
+        // 还没 running 时不要往下调度：此时 currentTime 不推进，
+        // osc.start(t0) 会落在一条停住的时间轴上，真机上直接吞掉。
+        return null;
+      }
       return this.ctx;
     },
+
+    // 取上下文但不要求已 running：suspended 时先 resume，成功后再补播。
+    // 直接丢弃的话，真机第一次点击（ctx 刚从手势里创建、还 suspended）必然没声音。
     tone(freq, duration = 0.12, type = 'sine', gain = 0.05, delay = 0) {
-      const ctx = this.ensure();
-      if (!ctx) return;
-      const t0 = ctx.currentTime + delay;
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, t0);
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(gain, t0 + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
-      osc.connect(g);
-      g.connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + duration + 0.03);
+      if (!this.enabled) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!this.ctx) {
+        try { this.ctx = new AC(); } catch (e) { return; }
+      }
+      const ctx = this.ctx;
+      const vol = Math.min(0.85, gain * this.volume);
+
+      const emit = () => {
+        if (ctx.state !== 'running') return;
+        const t0 = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + duration + 0.03);
+      };
+
+      if (ctx.state === 'running') {
+        emit();
+        return;
+      }
+      const p = ctx.resume();
+      if (p && p.then) p.then(emit).catch(() => {});
     },
     move() {
-      this.tone(520, 0.08, 'triangle', 0.035);
-      this.tone(660, 0.06, 'sine', 0.02, 0.035);
+      this.tone(720, 0.08, 'triangle', 0.05);
+      this.tone(980, 0.06, 'sine', 0.03, 0.035);
     },
     blocked() {
       this.tone(180, 0.1, 'square', 0.025);
@@ -8482,8 +8562,9 @@ button:focus-visible,
     updateSoundButton();
     saveProgress();
     if (state.sound) {
-      audio.ensure();
-      audio.prop();
+      audio.unlock();
+      // resume 是异步的，等它落定再发声，否则这一声会被丢掉
+      setTimeout(() => audio.prop(), 120);
     }
     toast(state.sound ? '声音打开啦' : '已静音');
   }
@@ -8496,6 +8577,12 @@ button:focus-visible,
   /* ---------- 事件绑定 ---------- */
 
   function bindEvents() {
+    // 第一次触摸/点击就把 AudioContext 解锁掉（iOS、微信内置浏览器硬性要求），
+    // 不能等玩家点第一张牌才现建：那一拍 ctx 还是 suspended，声音会被吞。
+    ['touchstart', 'pointerdown', 'click'].forEach(type => {
+      document.addEventListener(type, () => audio.unlock(), { passive: true, capture: true });
+    });
+
     els.board.addEventListener('click', onBoardClick);
 
     document.querySelectorAll('.prop').forEach(btn => {
@@ -8614,6 +8701,11 @@ button:focus-visible,
     openMap();
     els.continueBtn.focus({ preventScroll: true });
 
+    // 上次误触静音后，图标只是浅了一点，玩家根本看不出来，进来先提醒一句
+    if (!state.sound) {
+      setTimeout(() => toast('当前是静音，点右上角喇叭可以开声音'), 700);
+    }
+
     if (new URLSearchParams(location.search).has('debug')) {
       window.__CAPY__ = {
         state,
@@ -8640,6 +8732,7 @@ button:focus-visible,
         renderAchievements,
         syncAchievements,
         rollCardReward,
+        audio,
         starsForWin,
         starTargetMs,
         showReward,
