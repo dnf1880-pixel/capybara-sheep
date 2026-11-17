@@ -4166,16 +4166,15 @@ button:focus-visible,
 }
 
 /* ---------- 2. 局内 HUD：关卡 + 进度 + 用时 + 步数 ---------- */
+/* 放在棋盘上方独立一条，不做浮层：浮在棋盘里会压住第一行牌。 */
 .board-hud {
-  position: absolute;
+  position: relative;
   z-index: 6;
-  top: 7px;
-  left: 7px;
-  right: 7px;
   display: flex;
   align-items: center;
   gap: 8px;
   height: 26px;
+  margin: 0 0 8px;
   padding: 0 10px;
   border-radius: 999px;
   background: rgba(255, 253, 246, 0.86);
@@ -4251,6 +4250,13 @@ button:focus-visible,
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 3px 10px rgba(40, 28, 18, 0.24);
+}
+
+/* 玩起来之后就彻底收掉，别一直挂在牌堆底下 */
+.board-stage .board-help.is-gone {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(8px);
 }
 
 /* ---------- 4. 竖屏一屏：棋盘吃满剩余高度，卡槽贴底 ---------- */
@@ -4437,6 +4443,7 @@ button:focus-visible,
 
   .board-hud {
     height: 24px;
+    margin: 0 0 6px;
     padding: 0 8px;
     gap: 6px;
     font-size: 10px;
@@ -4896,10 +4903,11 @@ button:focus-visible,
   }
 }
 
-/* ④ 矮屏（iPhone SE / 8 的 667 高）：棋盘按高度反算宽度，保证「重新开始」不出屏 */
+/* ④ 矮屏（iPhone SE / 8 的 667 高）：棋盘按高度反算宽度，保证「重新开始」不出屏。
+   HUD 现在是棋盘外的一条，高度预算要从 300 提到 330。 */
 @media (max-width: 920px) and (max-height: 720px) {
   .board-stage {
-    height: calc(100dvh - 300px);
+    height: calc(100dvh - 330px);
     width: auto;
     max-width: 100%;
     margin: 0 auto;
@@ -5030,9 +5038,18 @@ button:focus-visible,
   }
 }
 
+/* ⑬ 顶栏那颗关卡胶囊和棋盘 HUD 说的是同一句话，去掉重复（HUD 才是主信息） */
+.topbar__mid {
+  display: none;
+}
+
+/* 胶囊去掉后图标组要顶到右边，不然全挤在品牌后面 */
+.topbar__actions {
+  margin-left: auto;
+}
+
 /* ⑫ 地图弹窗纵向撑开：场景吃掉剩余高度，底部按钮贴底，别让「继续冒险」下面空一大片 */
-@media (max-width: 920px) {
-  .map-modal {
+@media (max-width: 920px) {  .map-modal {
     display: flex;
     flex-direction: column;
   }
@@ -5317,26 +5334,26 @@ button:focus-visible,
 
     <main class="game">
       <section class="board-card" aria-label="游戏区域">
-        <div class="board-stage" id="boardStage">
-          <div class="board-hud">
-            <span class="board-hud__level" id="hudLevel">第 1 关</span>
-            <div class="progress" role="progressbar" aria-label="本关进度" aria-valuemin="0" aria-valuemax="36" aria-valuenow="0">
-              <i id="progressBar"></i>
-            </div>
-            <span class="board-hud__count" id="progressText">0 / 36</span>
-            <span class="board-hud__meta">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg>
-              <b id="timeText">0:00</b>
-            </span>
-            <span class="board-hud__meta">
-              <b id="movesText">0</b>
-              <i>步</i>
-            </span>
-            <span class="board-hud__meta board-hud__slot">
-              <i>槽</i>
-              <b id="hudSlot">0/7</b>
-            </span>
+        <div class="board-hud">
+          <span class="board-hud__level" id="hudLevel">第 1 关</span>
+          <div class="progress" role="progressbar" aria-label="本关进度" aria-valuemin="0" aria-valuemax="36" aria-valuenow="0">
+            <i id="progressBar"></i>
           </div>
+          <span class="board-hud__count" id="progressText">0 / 36</span>
+          <span class="board-hud__meta">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg>
+            <b id="timeText">0:00</b>
+          </span>
+          <span class="board-hud__meta">
+            <b id="movesText">0</b>
+            <i>步</i>
+          </span>
+          <span class="board-hud__meta board-hud__slot">
+            <i>槽</i>
+            <b id="hudSlot">0/7</b>
+          </span>
+        </div>
+        <div class="board-stage" id="boardStage">
           <div class="scenery" aria-hidden="true">
             <div class="sun"></div>
             <div class="cloud cloud--1"></div>
@@ -6910,12 +6927,11 @@ button:focus-visible,
     state.grid = next;
   }
 
+  // 引导只在开局露个脸：点第一张就淡下去，点满 3 张彻底消失，不常驻占着棋盘底部。
   function updateBoardHint() {
-    if (state.moves > 0 || state.status !== 'playing') {
-      els.boardStartHint.classList.add('is-hidden');
-    } else {
-      els.boardStartHint.classList.remove('is-hidden');
-    }
+    const idle = state.moves === 0 && state.status === 'playing';
+    els.boardStartHint.classList.toggle('is-hidden', !idle);
+    els.boardStartHint.classList.toggle('is-gone', state.moves >= 3 || state.status !== 'playing');
   }
 
   function updateStats() {
@@ -7089,6 +7105,7 @@ button:focus-visible,
     startTimer();
     els.tipText.textContent = '先点边缘露出来的贴纸，给卡槽留点空位～';
     els.boardStartHint.classList.remove('is-hidden');
+    els.boardStartHint.classList.remove('is-gone');
     audio.ensure();
     audio.prop();
     saveProgress();
@@ -7113,6 +7130,7 @@ button:focus-visible,
     stopTimer(true);
     updateAll();
     els.boardStartHint.classList.add('is-hidden');
+    els.boardStartHint.classList.add('is-gone');
   }
 
   /* ---------- 点击贴纸 / 即时三消 ---------- */
