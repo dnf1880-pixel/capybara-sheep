@@ -5068,6 +5068,346 @@ button:focus-visible,
   text-align: left;
 }
 
+/* ============================================================
+   第三轮重构：对齐羊了个羊——牌堆吃满屏、木托盘卡槽贴底、底部三按钮
+   ============================================================ */
+
+/* ---------- A. 一行小字：关卡 / 进度 / 用时 / 步数 / 槽位 ---------- */
+.slot-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.slot-meta__level {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-meta__cell {
+  flex: none;
+  color: var(--ink-soft);
+}
+
+.slot-meta__cell b {
+  color: var(--ink);
+  font-size: 11.5px;
+}
+
+.slot-meta .slot-count.is-warn {
+  color: #e2694a;
+}
+
+/* ---------- B. 木质托盘卡槽 ---------- */
+.slot-tray {
+  position: relative;
+  padding: 6px 8px 8px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #c9985f 0%, #b07f47 44%, #96652f 100%);
+  border: 2px solid #8a5a2a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 232, 196, 0.48),
+    inset 0 -3px 6px rgba(88, 54, 20, 0.34),
+    0 5px 0 #7a4d22,
+    0 12px 20px rgba(78, 50, 22, 0.26);
+}
+
+.slot-tray__bar {
+  height: 4px;
+  margin-bottom: 6px;
+  border-radius: 999px;
+  background: rgba(52, 30, 10, 0.62);
+  box-shadow: inset 0 1px 2px rgba(30, 16, 4, 0.5);
+  overflow: hidden;
+}
+
+.slot-tray__bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffe4a8, #ffc65c);
+  box-shadow: 0 0 6px rgba(255, 200, 92, 0.7);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slot-tray .slot {
+  gap: 5px;
+}
+
+.slot-tray .slot-cell {
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(58, 34, 12, 0.78), rgba(88, 56, 24, 0.55));
+  border: 1.5px solid rgba(44, 26, 10, 0.6);
+  box-shadow:
+    inset 0 4px 7px rgba(36, 20, 6, 0.58),
+    inset 0 -1px 0 rgba(255, 220, 170, 0.16);
+}
+
+.slot-tray .slot-tile {
+  inset: 0;
+  border-radius: 11px;
+}
+
+.slot-tray .slot-tile svg {
+  width: 78%;
+  height: 78%;
+}
+
+/* ---------- C. 底部三个道具按钮 ---------- */
+.props {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.prop {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 8px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #fffdf6, #f7ebd6);
+  border: 2px solid #fff;
+  box-shadow: 0 4px 0 rgba(120, 88, 50, 0.18), 0 9px 18px rgba(110, 80, 44, 0.13);
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.prop:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(120, 88, 50, 0.18), 0 5px 10px rgba(110, 80, 44, 0.14);
+}
+
+.prop__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+}
+
+.prop__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.prop__name {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.prop__count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 9.5px;
+  border-radius: 999px;
+  background: #f3a13b;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(160, 100, 20, 0.3);
+}
+
+.prop:disabled .prop__count {
+  background: #c9b9a2;
+}
+
+/* ---------- D. 手机竖屏：牌堆吃满剩余高度 ---------- */
+@media (max-width: 920px) {
+  .game {
+    justify-content: flex-start;
+    gap: 5px;
+  }
+
+  .board-card {
+    flex: 0 0 auto;
+    padding: 0;
+  }
+
+  .board-stage {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+  }
+
+  .side-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 5px;
+  }
+
+  .slot-meta {
+    padding: 1px 4px 0;
+  }
+
+  .props {
+    gap: 8px;
+    padding-bottom: 2px;
+  }
+
+  .prop {
+    padding: 10px 6px;
+    gap: 6px;
+  }
+
+  .prop__name {
+    font-size: 11.5px;
+  }
+}
+
+/* 矮屏：按高度反算棋盘宽度，保证底部三件套不出屏 */
+@media (max-width: 920px) and (max-height: 720px) {
+  .board-stage {
+    height: calc(100dvh - 246px);
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .board-card {
+    text-align: center;
+  }
+
+  .prop {
+    padding: 8px 5px;
+  }
+
+  .prop__icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* ---------- E. 设置弹窗 ---------- */
+.setting-modal {
+  width: min(400px, 100%);
+  text-align: left;
+}
+
+.setting-head {
+  position: relative;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.setting-head h2 {
+  margin: 2px 0 0;
+  font-size: 20px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 4px;
+  border-bottom: 1px solid rgba(151, 122, 87, 0.14);
+}
+
+.setting-row__icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-soft);
+}
+
+.setting-row__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.setting-row__label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.setting-range {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  accent-color: #f3a13b;
+  cursor: pointer;
+}
+
+.setting-row__val {
+  flex: none;
+  width: 30px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--orange-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.setting-switch {
+  margin-left: auto;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #ded1bc;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.setting-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(90, 60, 30, 0.28);
+  transition: transform 0.2s ease;
+}
+
+.setting-switch[aria-checked="true"] {
+  background: #7fae68;
+}
+
+.setting-switch[aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+
+.setting-action {
+  margin-left: auto;
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(151, 122, 87, 0.28);
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.setting-action:active {
+  transform: translateY(1px);
+}
+
+.setting-note {
+  margin: 12px 0 14px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
 /* ⑫ 地图弹窗纵向撑开：场景吃掉剩余高度，底部按钮贴底，别让「继续冒险」下面空一大片 */
 @media (max-width: 920px) {  .map-modal {
     display: flex;
@@ -5318,6 +5658,14 @@ button:focus-visible,
         <circle cx="17.5" cy="18.5" r="2.8" fill="none" stroke="currentColor" stroke-width="1.9"/>
         <path d="M9 10.6l6-3.6M9 13.4l6 3.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
       </symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24">
+        <path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M19.2 13.6a7.6 7.6 0 0 0 0-3.2l1.9-1.2-1.9-3.3-2.2.8a7.6 7.6 0 0 0-2.8-1.6L13.8 2h-3.8l-.4 2.1a7.6 7.6 0 0 0-2.8 1.6l-2.2-.8L2.7 8.2l1.9 1.2a7.6 7.6 0 0 0 0 3.2L2.7 13.9l1.9 3.3 2.2-.8a7.6 7.6 0 0 0 2.8 1.6l.4 2.1h3.8l.4-2.1a7.6 7.6 0 0 0 2.8-1.6l2.2.8 1.9-3.3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-vibrate" viewBox="0 0 24 24">
+        <rect x="8" y="3" width="8" height="18" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M4 8v8M2 10v4M20 8v8M22 10v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
     </defs>
   </svg>
 
@@ -5343,36 +5691,17 @@ button:focus-visible,
         <button class="icon-btn" id="achvBtn" type="button" aria-label="成就" title="成就">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-medal"/></svg>
         </button>
-        <button class="icon-btn" id="soundBtn" type="button" aria-label="关闭声音" title="声音">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound" id="soundIconUse" class="sound-icon-use"/></svg>
-        </button>
         <button class="icon-btn" id="helpBtn" type="button" aria-label="查看玩法" title="玩法">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-help"/></svg>
+        </button>
+        <button class="icon-btn" id="settingBtn" type="button" aria-label="设置" title="设置">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gear"/></svg>
         </button>
       </div>
     </header>
 
     <main class="game">
       <section class="board-card" aria-label="游戏区域">
-        <div class="board-hud">
-          <span class="board-hud__level" id="hudLevel">第 1 关</span>
-          <div class="progress" role="progressbar" aria-label="本关进度" aria-valuemin="0" aria-valuemax="36" aria-valuenow="0">
-            <i id="progressBar"></i>
-          </div>
-          <span class="board-hud__count" id="progressText">0 / 36</span>
-          <span class="board-hud__meta">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg>
-            <b id="timeText">0:00</b>
-          </span>
-          <span class="board-hud__meta">
-            <b id="movesText">0</b>
-            <i>步</i>
-          </span>
-          <span class="board-hud__meta board-hud__slot">
-            <i>槽</i>
-            <b id="hudSlot">0/7</b>
-          </span>
-        </div>
         <div class="board-stage" id="boardStage">
           <div class="scenery" aria-hidden="true">
             <div class="sun"></div>
@@ -5388,9 +5717,6 @@ button:focus-visible,
             <div class="sparkle sparkle--3">✦</div>
           </div>
           <div class="board" id="board" role="group" aria-label="贴纸堆"></div>
-          <div class="board-help" id="boardStartHint">
-            <span aria-hidden="true">👆</span> 先点没被压住的贴纸，凑齐三张同款
-          </div>
         </div>
       </section>
 
@@ -5402,49 +5728,40 @@ button:focus-visible,
           <div class="speech" id="tipText">慢慢来，卡皮巴拉陪着你～</div>
         </div>
 
-        <section class="slot-card">
-          <header class="card-head">
-            <h2>卡槽</h2>
-            <span class="slot-count" id="slotCount">0 / 7</span>
-          </header>
-          <div class="slot" id="slot" aria-label="卡槽，最多七张"></div>
-          <p class="slot-note">凑齐 3 张同款，就会自动消除</p>
-        </section>
-
-        <section class="props-card">
-          <header class="card-head">
-            <h2>摸摸道具</h2>
-            <span class="props-note">卡皮巴拉的压箱底</span>
-          </header>
-          <div class="props">
-            <button class="prop" type="button" data-prop="undo">
-              <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-undo"/></svg></span>
-              <span class="prop__name">撤销</span>
-              <span class="prop__count" id="undoCount">3</span>
-            </button>
-            <button class="prop" type="button" data-prop="shuffle">
-              <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-shuffle"/></svg></span>
-              <span class="prop__name">洗牌</span>
-              <span class="prop__count" id="shuffleCount">2</span>
-            </button>
-            <button class="prop" type="button" data-prop="hint">
-              <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-hint"/></svg></span>
-              <span class="prop__name">提示</span>
-              <span class="prop__count" id="hintCount">3</span>
-            </button>
-          </div>
-        </section>
-
-        <div class="mobile-stats" id="mobileStats">
-          <div><i>本关最佳</i><b id="msBest">—</b></div>
-          <div><i>总星数</i><b id="msStars">0 / 108</b></div>
-          <div><i>卡册</i><b id="msCards">0 / 12</b></div>
+        <!-- 一行小字：关卡 / 进度 / 用时 / 步数 / 卡槽占用 -->
+        <div class="slot-meta">
+          <span class="slot-meta__level" id="hudLevel">第 1 关</span>
+          <span class="slot-meta__cell"><b id="progressText">0 / 36</b></span>
+          <span class="slot-meta__cell"><b id="timeText">0:00</b></span>
+          <span class="slot-meta__cell"><b id="movesText">0</b>步</span>
+          <span class="slot-meta__cell slot-count" id="slotCount">0/7</span>
         </div>
 
-        <button class="restart-btn" id="restartBtn" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-restart"/></svg>
-          重新开始
-        </button>
+        <!-- 木质托盘卡槽：贴在牌堆下方，和羊了个羊一样 -->
+        <div class="slot-tray">
+          <div class="progress slot-tray__bar" role="progressbar" aria-label="本关进度" aria-valuemin="0" aria-valuemax="36" aria-valuenow="0">
+            <i id="progressBar"></i>
+          </div>
+          <div class="slot" id="slot" aria-label="卡槽，最多七张"></div>
+        </div>
+
+        <div class="props">
+          <button class="prop" type="button" data-prop="undo">
+            <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-undo"/></svg></span>
+            <span class="prop__name">撤销</span>
+            <span class="prop__count" id="undoCount">3</span>
+          </button>
+          <button class="prop" type="button" data-prop="shuffle">
+            <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-shuffle"/></svg></span>
+            <span class="prop__name">洗牌</span>
+            <span class="prop__count" id="shuffleCount">2</span>
+          </button>
+          <button class="prop" type="button" data-prop="hint">
+            <span class="prop__icon"><svg viewBox="0 0 24 24"><use href="#i-hint"/></svg></span>
+            <span class="prop__name">提示</span>
+            <span class="prop__count" id="hintCount">3</span>
+          </button>
+        </div>
       </aside>
     </main>
 
@@ -5625,6 +5942,39 @@ button:focus-visible,
     </div>
   </div>
 
+  <!-- 设置：音量 / 震动 / 重开 -->
+  <div class="overlay" id="settingOverlay" aria-hidden="true">
+    <div class="modal setting-modal" role="dialog" aria-modal="true" aria-labelledby="settingTitle">
+      <header class="setting-head">
+        <p class="eyebrow">SETTINGS</p>
+        <h2 id="settingTitle">设置</h2>
+        <button class="modal-close" id="settingClose" type="button" aria-label="关闭">×</button>
+      </header>
+
+      <div class="setting-row">
+        <span class="setting-row__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg></span>
+        <span class="setting-row__label">音效音量</span>
+        <input type="range" id="sfxRange" class="setting-range" min="0" max="100" step="5" value="100" aria-label="音效音量" />
+        <b class="setting-row__val" id="sfxVal">100</b>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-row__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-vibrate"/></svg></span>
+        <span class="setting-row__label">震动反馈</span>
+        <button class="setting-switch" id="vibeToggle" type="button" role="switch" aria-checked="false" aria-label="震动反馈"></button>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-row__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-restart"/></svg></span>
+        <span class="setting-row__label">重新开始本关</span>
+        <button class="setting-action" id="settingRestart" type="button">重开</button>
+      </div>
+
+      <p class="setting-note">音量拉满还听不见？先看手机侧边的静音开关是不是拨下去了。</p>
+      <button class="primary-btn" id="settingOk" type="button">好</button>
+    </div>
+  </div>
+
   <!-- 卡槽失败结算 -->
   <div class="overlay" id="resultOverlay" aria-hidden="true">
     <div class="modal result-modal is-lose" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
@@ -5693,11 +6043,11 @@ button:focus-visible,
 
   const BOARD_COLS = 9;
   const BOARD_ROWS = 8;
-  // 竖屏用 6 列 × 8 行：牌块从 41px 提到 62px（拇指友好），
-  // 同一片区域塞同样多的牌，密度从五成提到七成，看起来才是"堆"不是"撒"。
+  // 竖屏用 6 列 × 9 行：牌块 62px（拇指友好），纵向吃满屏幕，
+  // 牌堆占到屏高约 2/3，和羊了个羊的观感接近。
   // shrink 控制逐层收缩速度：列少了必须放慢收缩，否则高层放不下最后几层。
   const BOARD_COLS_NARROW = 6;
-  const BOARD_ROWS_NARROW = 8;
+  const BOARD_ROWS_NARROW = 9;
   const NARROW_QUERY = '(max-width: 920px)';
   const SLOT_SIZE = 7;
   const LEVELS_PER_CHAPTER = 3;
@@ -6037,7 +6387,15 @@ button:focus-visible,
     mobileStats: $('#mobileStats'),
     msBest: $('#msBest'),
     msStars: $('#msStars'),
-    msCards: $('#msCards')
+    msCards: $('#msCards'),
+    settingBtn: $('#settingBtn'),
+    settingOverlay: $('#settingOverlay'),
+    settingClose: $('#settingClose'),
+    settingOk: $('#settingOk'),
+    settingRestart: $('#settingRestart'),
+    sfxRange: $('#sfxRange'),
+    sfxVal: $('#sfxVal'),
+    vibeToggle: $('#vibeToggle')
   };
 
   /* ---------- 工具函数 ---------- */
@@ -6142,6 +6500,8 @@ button:focus-visible,
       cards: {},
       shards: 0,
       sound: true,
+      sfxVolume: 100,
+      vibrate: false,
       totalClears: 0,
       totalShards: 0,
       bestTimes: {},
@@ -6229,6 +6589,8 @@ button:focus-visible,
         cards,
         shards: Math.max(0, Math.floor(Number(saved.shards) || 0)),
         sound: saved.sound !== false,
+        sfxVolume: clamp(Math.round(Number(saved.sfxVolume ?? 100)), 0, 100),
+        vibrate: saved.vibrate === true,
         totalClears: Math.max(0, Math.floor(Number(saved.totalClears) || 0)),
         totalShards: Math.max(0, Math.floor(Number(saved.totalShards) || 0)),
         bestTimes,
@@ -6251,6 +6613,8 @@ button:focus-visible,
         cards: progress.cards,
         shards: progress.shards,
         sound: state.sound,
+        sfxVolume: state.sfxVolume,
+        vibrate: state.vibrate,
         totalClears: progress.totalClears,
         totalShards: progress.totalShards,
         bestTimes: progress.bestTimes,
@@ -6607,6 +6971,8 @@ button:focus-visible,
     status: 'idle', // idle | playing | won | lost
     locked: false,
     sound: progress.sound,
+    sfxVolume: progress.sfxVolume,
+    vibrate: progress.vibrate,
     props: { undo: 3, shuffle: 2, hint: 3 },
     hintIds: new Set(),
     hintTimer: null,
@@ -6619,7 +6985,9 @@ button:focus-visible,
     propUsed: false
   };
 
-  audio.enabled = state.sound;
+  // 手机外放音量本来就小，基准增益比桌面高一截；滑块 0-100 映射到 0-4 倍
+  audio.volume = (state.sfxVolume / 100) * 4;
+  audio.enabled = state.sound && state.sfxVolume > 0;
 
   /* ---------- 章节 / 关卡 ---------- */
 
@@ -7007,8 +7375,9 @@ button:focus-visible,
     state.grid = next;
   }
 
-  // 引导只在开局露个脸：点第一张就淡下去，点满 3 张彻底消失，不常驻占着棋盘底部。
+  // 引导条已经删掉了（牌堆里不挂任何文字），保留判空避免旧引用炸掉
   function updateBoardHint() {
+    if (!els.boardStartHint) return;
     const idle = state.moves === 0 && state.status === 'playing';
     els.boardStartHint.classList.toggle('is-hidden', !idle);
     els.boardStartHint.classList.toggle('is-gone', state.moves >= 3 || state.status !== 'playing');
@@ -7184,8 +7553,10 @@ button:focus-visible,
     updateLevelLabel();
     startTimer();
     els.tipText.textContent = '先点边缘露出来的贴纸，给卡槽留点空位～';
-    els.boardStartHint.classList.remove('is-hidden');
-    els.boardStartHint.classList.remove('is-gone');
+    if (els.boardStartHint) {
+      els.boardStartHint.classList.remove('is-hidden');
+      els.boardStartHint.classList.remove('is-gone');
+    }
     audio.ensure();
     audio.prop();
     saveProgress();
@@ -7209,8 +7580,10 @@ button:focus-visible,
     state.lastRecord = null;
     stopTimer(true);
     updateAll();
-    els.boardStartHint.classList.add('is-hidden');
-    els.boardStartHint.classList.add('is-gone');
+    if (els.boardStartHint) {
+      els.boardStartHint.classList.add('is-hidden');
+      els.boardStartHint.classList.add('is-gone');
+    }
   }
 
   /* ---------- 点击贴纸 / 即时三消 ---------- */
@@ -7284,6 +7657,7 @@ button:focus-visible,
     updateProps();
     updateBoardHint();
     audio.move();
+    buzz(8);
 
     sourceEl.classList.add('is-picked');
     setTimeout(() => sourceEl.remove(), 280);
@@ -7360,6 +7734,7 @@ button:focus-visible,
 
     createMatchGhosts(type);
     audio.match();
+    buzz(20);
     setTip('漂亮！三张一起消失啦 ✨');
 
     ids.forEach(id => {
@@ -8547,17 +8922,42 @@ button:focus-visible,
   }
 
   function updateSoundButton() {
-    audio.enabled = state.sound;
+    const audible = state.sound && state.sfxVolume > 0;
+    audio.enabled = audible;
+    audio.volume = (state.sfxVolume / 100) * 4;
     document.querySelectorAll('.sound-icon-use').forEach(use => {
-      use.setAttribute('href', state.sound ? '#i-sound' : '#i-mute');
+      use.setAttribute('href', audible ? '#i-sound' : '#i-mute');
     });
-    els.soundBtn.setAttribute('aria-label', state.sound ? '关闭声音' : '开启声音');
-    els.mapSoundBtn.setAttribute('aria-label', state.sound ? '关闭声音' : '开启声音');
-    els.soundBtn.classList.toggle('is-muted', !state.sound);
-    els.mapSoundBtn.classList.toggle('is-muted', !state.sound);
+    if (els.mapSoundBtn) {
+      els.mapSoundBtn.setAttribute('aria-label', audible ? '关闭声音' : '开启声音');
+      els.mapSoundBtn.classList.toggle('is-muted', !audible);
+    }
+    if (els.sfxRange) els.sfxRange.value = String(state.sfxVolume);
+    if (els.sfxVal) els.sfxVal.textContent = String(state.sfxVolume);
+    if (els.vibeToggle) {
+      els.vibeToggle.setAttribute('aria-checked', state.vibrate ? 'true' : 'false');
+    }
+  }
+
+  // 短震动：只在设置里开了才震，手机上给点触感反馈
+  function buzz(ms = 12) {
+    if (!state.vibrate) return;
+    if (navigator.vibrate) {
+      try { navigator.vibrate(ms); } catch (e) { /* 部分浏览器禁用 */ }
+    }
+  }
+
+  function openSettings() {
+    updateSoundButton();
+    openOverlay(els.settingOverlay);
+  }
+
+  function closeSettings() {
+    closeOverlay(els.settingOverlay);
   }
 
   function toggleSound() {
+    if (state.sfxVolume <= 0) state.sfxVolume = 100;
     state.sound = !state.sound;
     updateSoundButton();
     saveProgress();
@@ -8651,17 +9051,41 @@ button:focus-visible,
     els.achvBtn.addEventListener('click', openAchievements);
     els.achvClose.addEventListener('click', () => closeOverlay(els.achvOverlay));
 
-    $('#restartBtn').addEventListener('click', () => {
+    els.settingBtn.addEventListener('click', openSettings);
+    els.settingClose.addEventListener('click', closeSettings);
+    els.settingOk.addEventListener('click', closeSettings);
+
+    els.sfxRange.addEventListener('input', event => {
+      state.sfxVolume = Number(event.target.value) || 0;
+      state.sound = state.sfxVolume > 0;
+      updateSoundButton();
+      saveProgress();
+      if (state.sfxVolume > 0) {
+        audio.unlock();
+        audio.move();
+        buzz(10);
+      }
+    });
+
+    els.vibeToggle.addEventListener('click', () => {
+      state.vibrate = !state.vibrate;
+      updateSoundButton();
+      saveProgress();
+      buzz(24);
+    });
+
+    els.settingRestart.addEventListener('click', () => {
       const hadProgress = state.moves > 0 || state.slots.length > 0;
+      closeSettings();
       startLevel(state.levelIndex);
       if (hadProgress) toast('重新开局，这次一定行');
     });
 
-    els.soundBtn.addEventListener('click', toggleSound);
-
     document.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
-      if (els.rankOverlay.classList.contains('is-open')) {
+      if (els.settingOverlay.classList.contains('is-open')) {
+        closeSettings();
+      } else if (els.rankOverlay.classList.contains('is-open')) {
         closeOverlay(els.rankOverlay);
       } else if (els.achvOverlay.classList.contains('is-open')) {
         closeOverlay(els.achvOverlay);
